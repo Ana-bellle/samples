@@ -2,6 +2,7 @@ import pandas as pd # type: ignore
 import numpy as np
 import plotly.graph_objects as go # type: ignore
 from PIL import Image, ImageChops # type: ignore
+import os
 
 # ---------------------------------------------------------------------------
 #  таблица - strict_table.png
@@ -9,20 +10,9 @@ from PIL import Image, ImageChops # type: ignore
 # m - пример данных
 # ---------------------------------------------------------------------------
 color = "#cbd6db"
-m = np.array([[1, 2, 3, 5],
-                  [4, 5, 6, 5],
-                  [7, 8, 9, 3],
-                  [7, 8, 9, 3],
-                  [1, 2, 3, 5],
-                  [4, 5, 6, 5],
-                  [7, 8, 9, 3],
-                  [7, 8, 9, 3],
-                  [1, 2, 3, 5],
-                  [4, 5, 6, 5] ,
-                  [4, 5, 6, 5]        
-                  ])
-def save_table():
-    df = pd.DataFrame(m)
+
+
+def _make_table(df: pd.DataFrame) -> go.Figure:
     n = len(df) # for total height of figure to save
     row_colors = ['#ffffff', color]
     fill_colors_per_col = [row_colors * int(n//2 + n%2)]
@@ -52,8 +42,35 @@ def save_table():
         height=n*height + 70,
         margin=dict(l=20, r=20, t=30, b=20),
     )
-    fig.show()
-    filename = "strict_table.png"
-    #fig.write_image(filename, scale=2)
+    return fig
 
-save_table()
+def show_table(df: pd.DataFrame):
+    fig = _make_table(df)
+    fig.show()
+
+def save_table(df: pd.DataFrame, path: str) -> None:
+    fig = _make_table(df)
+    try:
+        fig.write_image(path, scale=2)
+    except FileNotFoundError:
+        print(f"Путя'{path} не существует")
+        return
+    except PermissionError:
+        print("Ошибка доступа - возможно, файл уже открыт в другой программе")
+        return
+
+m = np.array([[1, 2, 3, 5],
+                  [4, 5, 6, 5],
+                  [7, 8, 9, 3],
+                  [7, 8, 9, 3],
+                  [1, 2, 3, 5],
+                  [4, 5, 6, 5],
+                  [7, 8, 9, 3],
+                  [7, 8, 9, 3],
+                  [1, 2, 3, 5],
+                  [4, 5, 6, 5] ,
+                  [4, 5, 6, 5]])
+df1 = pd.DataFrame(m)
+
+#show_table(df1)
+save_table(df1, "C:\\library\\strict_table.png")
